@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			html {
+				font-family: "Lucida Console", Monaco, monospace;
+				color: grey;
+			}
+
+			body {
+				background: white;
+				border-radius: 10px;
+			}
+
+			.selected {
+				background: white;
+				/* border-width: 1px !important; */
+				/* border-color:deepskyblue !important; */
+				/* color:deepskyblue; */
+				font-style: italic;
+				text-decoration: line-through;
+				/* padding: 8px !important; */
+			}
+
+			.buttonMouseDown {
+				background: darkgray;
+				border-color: black;
+			}
+
+			.removeImage {
+				padding-left: 10px;
+				opacity: 0.5;
+			}
+
+			:hover {
+				opacity: 1;
+			}
+
+			.filterUserList {
+				min-width: 250px;
+				display: contents;
+
+				list-style-type: none;
+
+				position: relative;
+				flex: 1 1 0px;
+
+			}
+
+			.discussingUser {
+				align-self: center;
+				font-size: medium;
+
+				min-width: 250px;
+				padding: 2px 8px 2px 8px;
+				margin: -1px;
+				border: 1px lightgray solid;
+				cursor: pointer;
+				color: black;
+			}
+			.filterBoxHeader {
+				margin: 0 0 8px 8px;
+			}
+
+			.filterBox {
+				border:  solid 0.5px  grey;
+				border-radius: 5px 5px 5px 5px;
+				padding: 5px;
+				margin: 10px;
+				font-size: medium;
+			}
+
+			.filterCheckbox {
+				margin: 5px;
+			}
+
+			::placeholder {
+				font-size: "10px";
+				font-style: italic;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="otherFilterBox" class= "filterBox">
+			<div class="filterCheckbox">
+				<input type="checkbox" id="hideRebuilds" name="hideRebuilds" value="hideRebuilds">
+				<label>hide rebuilds</label>
+			</div>
+			<div class="filterCheckbox">
+				<input type="checkbox" id="hideResolvedDiscussions" name="hideResolvedDiscussions" value="hideResolvedDiscussions">
+				<label>hide resolved discussions</label>
+			</div>
+			<div class="filterCheckbox">
+				<input type="checkbox" id="hideOldJenkins" name="hideOldJenkins" value="hideOldJenkins">
+				<label>only show last 3 Jenkins</label>
+			</div>
+			<div class="filterCheckbox">
+				<input type="checkbox" id="hideOldCommits" name="hideOldCommits" value="hideOldCommits">
+				<label>only show last 3 commits</label>
+			</div>
+			<div class="filterCheckbox">
+				<input type="checkbox" id="hideOldEverything" name="hideOldEverything" value="hideOldEverything">
+				<label>only show last 3 days</label>
+			</div>
+		</div>
+		<div id="userFilterBox" class="filterBox">
+			<div class="filterBoxHeader">
+				<span>Hide discussions by:</span>
+			</div>
+			<ul id="filterUserList" class="filterUserList"></ul>
+		</div>
+	</body>
+	<script src="popup.js"></script>
+</html>

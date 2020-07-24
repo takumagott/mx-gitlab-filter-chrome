@@ -1,0 +1,23 @@
+    .hide-user {
+        display: none !important;
+    }
+
+    .hide-resolved {
+        display: none !important;
+    }
+
+    .hide-old-commits {
+        display: none !important;
+    }
+
+    .hide-old-jenkins {
+        display: none !important;
+    }
+
+    .hide-rebuilds {
+        display: none !important;
+    }
+
+    .hide-old-everything {
+        display: none !important;
+    }
