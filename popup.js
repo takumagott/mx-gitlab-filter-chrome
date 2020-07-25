@@ -5,12 +5,15 @@ const HIDE_RESOLVED_CSS = 'hide-resolved';
 const HIDE_RESOLVED_DISCUSSIONS_ELEMENT = 'hideResolvedDiscussions';
 const HIDE_OLD_JENKINS_CSS = 'hide-old-jenkins';
 const HIDE_OLD_JENKINS_ELEMENT = 'hideOldJenkins';
+const HIDE_OLD_JENKINS_NUMBER = 'hideOldJenkinsNumber';
 const HIDE_OLD_COMMITS_CSS = 'hide-old-commits';
 const HIDE_OLD_COMMITS_ELEMENT = 'hideOldCommits';
+const HIDE_OLD_COMMITS_NUMBER = 'hideOldCommitsNumber';
 const HIDE_REBUILDS_ELEMENT = 'hideRebuilds';
 const HIDE_REBUILDS_CSS = 'hide-rebuilds';
 const HIDE_OLD_EVERYTHING_ELEMENT = 'hideOldEverything';
 const HIDE_OLD_EVERYTHING_CSS = 'hide-old-everything';
+const HIDE_OLD_EVERYTHING_NUMBER = 'hideOldEverythingNumber';
 var discussingUsers = {};
 let currentTabId;
 
@@ -24,10 +27,10 @@ const hasSomeParentTheClassString = `
 `
 const checkboxInfos = {
 	[HIDE_RESOLVED_DISCUSSIONS_ELEMENT]: {hideFunction: hideResolvedDiscussions, showFunction: showResolvedDiscussions, css: HIDE_RESOLVED_CSS},
-	[HIDE_OLD_JENKINS_ELEMENT]: {hideFunction: hideOldJenkins, showFunction: showOldJenkins, css: HIDE_OLD_JENKINS_CSS},
-	[HIDE_OLD_COMMITS_ELEMENT]: {hideFunction: hideOldCommits, showFunction: showOldCommits, css: HIDE_OLD_COMMITS_CSS},
+	[HIDE_OLD_JENKINS_ELEMENT]: {hideFunction: hideOldJenkins, showFunction: showOldJenkins, css: HIDE_OLD_JENKINS_CSS, numberBox: HIDE_OLD_JENKINS_NUMBER},
+	[HIDE_OLD_COMMITS_ELEMENT]: {hideFunction: hideOldCommits, showFunction: showOldCommits, css: HIDE_OLD_COMMITS_CSS, numberBox: HIDE_OLD_COMMITS_NUMBER},
 	[HIDE_REBUILDS_ELEMENT]: {hideFunction: hideRebuilds, showFunction: showRebuilds, css: HIDE_REBUILDS_CSS},
-	[HIDE_OLD_EVERYTHING_ELEMENT]: {hideFunction: hideOldEverything, showFunction: showOldEverything, css: HIDE_OLD_EVERYTHING_CSS}
+	[HIDE_OLD_EVERYTHING_ELEMENT]: {hideFunction: hideOldEverything, showFunction: showOldEverything, css: HIDE_OLD_EVERYTHING_CSS, numberBox: HIDE_OLD_EVERYTHING_NUMBER}
 }
 
 document.addEventListener('DOMContentLoaded', initiate(), false);
@@ -41,6 +44,13 @@ function addEventListenersForCheckbox(elementName) {
 	var element = document.getElementById(elementName);
 	element.addEventListener('change', onCheckboxChange(element, checkboxInfos[elementName].hideFunction, checkboxInfos[elementName].showFunction));
 	element.parentElement.children[1].addEventListener('click', onLabelClick(element, checkboxInfos[elementName].hideFunction, checkboxInfos[elementName].showFunction));
+	if(checkboxInfos[elementName].numberBox)
+		addEventListenersForNumberBox(elementName)
+}
+
+function addEventListenersForNumberBox(elementName) {
+	var numberBox = document.getElementById(checkboxInfos[elementName].numberBox);
+	numberBox.addEventListener('change', onChangeNumber(elementName));
 }
 
 function onLabelClick(element, hideFunction, showFunction) {
@@ -137,6 +147,13 @@ function initiateCheckboxes(){
 			{code: script},
 			function (results) {
 				document.getElementById(el).checked = results[0];
+				if(checkboxInfos[el].numberBox){
+					chrome.storage.local.get([settingName(el)], function(result) {
+						var savedValue = result[settingName(el)];
+						if(savedValue > 0)
+							document.getElementById(checkboxInfos[el].numberBox).value = savedValue;
+					});
+				}
 			}
 		)
 	}
@@ -223,7 +240,6 @@ function hideResolvedDiscussions() {
 	}
 	`
 	chrome.tabs.executeScript({code: script});
-	saveSetCheckboxValue(HIDE_RESOLVED_DISCUSSIONS_ELEMENT);
 }
 
 function showResolvedDiscussions() {
@@ -235,10 +251,10 @@ function showResolvedDiscussions() {
 	}
 	`
 	chrome.tabs.executeScript({code: script});
-	saveClearCheckboxValue(HIDE_RESOLVED_DISCUSSIONS_ELEMENT);
 }
 
 function hideOldJenkins() {
+	var number = document.getElementById(HIDE_OLD_JENKINS_NUMBER).value;
 	var script = `
 	var jenkinsEntries = [];
 	var timelineEntries = document.getElementsByClassName("timeline-entry");
@@ -250,11 +266,15 @@ function hideOldJenkins() {
 		if(user.toLowerCase() == "jenkins builder")
 			jenkinsEntries.push(timelineEntry);
 	}
-	for (let i = 0; i < jenkinsEntries.length - 3; i++) {
-		jenkinsEntries[i].classList.add("${HIDE_OLD_JENKINS_CSS}");
+	for (let i = 0; i < jenkinsEntries.length; i++) {
+		if(i < jenkinsEntries.length - ${number})
+			jenkinsEntries[i].classList.add("${HIDE_OLD_JENKINS_CSS}");
+		else {
+			if(jenkinsEntries[i].classList.contains("${HIDE_OLD_JENKINS_CSS}"))
+				jenkinsEntries[i].classList.remove("${HIDE_OLD_JENKINS_CSS}");
+		}
 	}`
 	chrome.tabs.executeScript({code: script});
-	saveSetCheckboxValue(HIDE_OLD_JENKINS_ELEMENT);
 }
 
 function showOldJenkins() {
@@ -266,10 +286,10 @@ function showOldJenkins() {
 	}
 	`
 	chrome.tabs.executeScript({code: script});
-	saveClearCheckboxValue(HIDE_OLD_JENKINS_ELEMENT);
 }
 
 function hideOldCommits() {
+	var number = document.getElementById(HIDE_OLD_COMMITS_NUMBER).value;
 	var script = `
 	var commitEntries = [];
 	var timelineEntries = document.getElementsByClassName("timeline-entry");
@@ -282,11 +302,15 @@ function hideOldCommits() {
 		commitEntries.push(timelineEntry);
 	}
 	
-	for (let i = 0; i < commitEntries.length - 3; i++) {
-		commitEntries[i].classList.add("${HIDE_OLD_COMMITS_CSS}");
+	for (let i = 0; i < commitEntries.length; i++) {
+		if(i < commitEntries.length - ${number})
+			commitEntries[i].classList.add("${HIDE_OLD_COMMITS_CSS}");
+		else {
+			if(commitEntries[i].classList.contains("${HIDE_OLD_COMMITS_CSS}"))
+				commitEntries[i].classList.remove("${HIDE_OLD_COMMITS_CSS}");
+		}
 	}`
 	chrome.tabs.executeScript({code: script});
-	saveSetCheckboxValue(HIDE_OLD_COMMITS_ELEMENT);
 }
 
 function showOldCommits() {
@@ -297,7 +321,6 @@ function showOldCommits() {
 			timelineEntry.classList.remove("${HIDE_OLD_COMMITS_CSS}");
 	}`
 	chrome.tabs.executeScript({code: script});
-	saveClearCheckboxValue(HIDE_OLD_COMMITS_ELEMENT);
 }
 
 function hideRebuilds() {
@@ -312,7 +335,6 @@ function hideRebuilds() {
 	}
 	`
 	chrome.tabs.executeScript({code: script});
-	saveSetCheckboxValue(HIDE_REBUILDS_ELEMENT)
 }
 
 function showRebuilds() {
@@ -323,18 +345,29 @@ function showRebuilds() {
 			timelineEntry.classList.remove("${HIDE_REBUILDS_CSS}");
 	}`
 	chrome.tabs.executeScript({code: script});
-	saveClearCheckboxValue(HIDE_REBUILDS_CSS);
 }
 
 function hideOldEverything() {
+	var number = document.getElementById(HIDE_OLD_EVERYTHING_NUMBER).value;
+	// :-( time stamp can't be parsed
+	var condition = "if(text.includes('year') || text.includes('month') || text.includes('week') ";
+	for(let i = 6; i > number; i--){
+		condition += `|| text.includes('${i} days') `;
+	}
+	condition+=")";
+
 	var script = `
 	var timelineEntries = document.getElementsByClassName("timeline-entry");
 	for (let timelineEntry of timelineEntries){
 		var time = timelineEntry.getElementsByTagName("time");
 		if(time.length > 0){
-			var text = time[0].textContent; // :-( time stamp can't be parsed
-			if(text.includes("week") || text.includes("month") || text.includes("year") || text.includes("days") && !text.includes("2 days") && !text.includes("3 days"))
+			var text = time[0].textContent;
+			${condition}
 				timelineEntry.classList.add("${HIDE_OLD_EVERYTHING_CSS}");
+			else{
+				if(timelineEntry.classList.contains("${HIDE_OLD_EVERYTHING_CSS}"))
+					timelineEntry.classList.remove("${HIDE_OLD_EVERYTHING_CSS}");
+			}
 		}
 	}
 	`
@@ -356,22 +389,15 @@ function settingName(elementName){
 	return `${currentTabId}_${elementName}`;
 }
 
-function saveSetCheckboxValue(elementName) {
-	// chrome.storage.local.get([settingName(elementName)],
-	// 	function (result) {
-	// 		if (!!result[settingName(elementName)])
-	// 			return;
-	// 		chrome.storage.local.set({ [settingName(elementName)]: true });
-	// 	});
-}
-
-function saveClearCheckboxValue(elementName) {
-	// chrome.storage.local.get([settingName(elementName)], 
-	// 	function(result) {
-	// 		if(!result[settingName(elementName)])
-	// 			return;
-	// 		chrome.storage.local.remove([settingName(elementName)])
-	// 	})
+function onChangeNumber(elementName){
+	return function() {
+		chrome.storage.local.set({ [settingName(elementName)]: document.getElementById(checkboxInfos[elementName].numberBox).value }, 
+		function() {
+			if(document.getElementById(elementName).checked)
+				checkboxInfos[elementName].hideFunction();
+			}
+		);
+	}
 }
 
 Array.prototype.unique = function() {
