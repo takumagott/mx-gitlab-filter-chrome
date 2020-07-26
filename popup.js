@@ -81,6 +81,8 @@ function refreshList() {
 	let filterUserList = document.getElementById("filterUserList");
 	filterUserList.innerHTML = "";
 	chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+		if(!discussingUsers) 
+			return;
 		Object.keys(discussingUsers).forEach(user => {
 			const userRow = document.createElement("li");
 			if(discussingUsers.hasOwnProperty(user))
@@ -146,7 +148,8 @@ function initiateCheckboxes(){
 		chrome.tabs.executeScript(
 			{code: script},
 			function (results) {
-				document.getElementById(el).checked = results[0];
+				if(results)
+					document.getElementById(el).checked = results[0];
 				if(checkboxInfos[el].numberBox){
 					chrome.storage.local.get([settingName(el)], function(result) {
 						var savedValue = result[settingName(el)];
@@ -171,10 +174,10 @@ function initiateDiscussingUsers(){
 				continue;
 			if(hasSomeParentTheClass(timelineEntry, "discussion-notes"))
 				continue;
-			var headerInfo = timelineEntry.getElementsByClassName("note-header-info")[0];
-			if(!headerInfo)
+			var headerInfo = timelineEntry.getElementsByClassName("note-header-info");
+			if(!headerInfo || headerInfo.length == 0)
 				continue;
-			var user = headerInfo.getElementsByClassName("note-header-author-name")[0].textContent;
+			var user = headerInfo[0].getElementsByClassName("note-header-author-name")[0].textContent;
 			if(users.hasOwnProperty(user))
 				continue;
 			users[user] = timelineEntry.classList.contains("${HIDE_USER_CSS}");
@@ -185,7 +188,8 @@ function initiateDiscussingUsers(){
 	chrome.tabs.executeScript(
 		{code: script}, 
 		function (results) {
-			discussingUsers = results[0];
+			if(results)
+				discussingUsers = results[0];
 			refreshList();
 		});
 }
