@@ -4,22 +4,24 @@
 		<style>
 			html {
 				font-family: "Lucida Console", Monaco, monospace;
-				color: grey;
+				color: darkslateblue;
 			}
 
 			body {
-				background: white;
+				background: lightgray;
 				border-radius: 10px;
+				background-image: url('images/mxlab.png');
+				background-repeat: no-repeat;
+				background-size: 250px;
+				background-attachment: fixed;
+				background-position: center;
 			}
 
 			.selected {
-				background: white;
-				/* border-width: 1px !important; */
-				/* border-color:deepskyblue !important; */
-				/* color:deepskyblue; */
+				background: rgb(255, 255, 255, 0.5) !important;
+				color: grey !important;
 				font-style: italic;
 				text-decoration: line-through;
-				/* padding: 8px !important; */
 			}
 
 			.buttonMouseDown {
@@ -51,22 +53,23 @@
 
 				padding: 2px 8px;
 				margin: -1px;
-				border: 1px lightgray solid;
+				border: 1px rgba(119, 136, 153, 0.5) solid;
 				border-radius: 3px;
 				cursor: pointer;
-				color: grey;
+				color: rgba(71, 61, 139, 0.9);
 			}
 			.filterBoxHeader {
 				margin: 0 0 8px 8px;
 			}
 
 			.filterBox {
-				border:  solid 0.5px  grey;
+				border:  solid 0.5px lightslategray;
 				border-radius: 5px 5px 5px 5px;
 				padding: 5px;
 				margin: 10px 0;
 				min-width: 250px;
 				font-size: medium;
+				background:rgb(255, 255, 255, 0.4);
 			}
 
 			.filterCheckbox {
@@ -86,6 +89,7 @@
 	</head>
 
 	<body>
+		
 		<div id="otherFilterBox" class= "filterBox">
 			<div class="filterCheckbox">
 				<input type="checkbox" id="hideRebuilds" name="hideRebuilds" value="hideRebuilds">
